@@ -9,21 +9,20 @@
 const char keyboard_map[CHIP8_TOTAL_KEYS] = {
     SDLK_0, SDLK_1, SDLK_2, SDLK_3, SDLK_4, SDLK_5,
     SDLK_6, SDLK_7, SDLK_8, SDLK_9, SDLK_a, SDLK_b,
-    SDLK_c, SDLK_d, SDLK_e, SDLK_f
-};
+    SDLK_c, SDLK_d, SDLK_e, SDLK_f};
 
 int main(int argc, char **argv)
 {
-    if(argc < 2)
+    if (argc < 2)
     {
         printf("You must provide a file to load.\n");
         return -1;
     }
 
-    const char* filename = argv[1];
+    const char *filename = argv[1];
     printf("the filename to load is: %s\n", filename);
 
-    FILE* f = fopen (filename, "rb");
+    FILE *f = fopen(filename, "rb");
     if (!f)
     {
         printf("failed to open file\n");
@@ -45,8 +44,14 @@ int main(int argc, char **argv)
     struct chip8 chip8;
     chip8_init(&chip8);
     chip8_load(&chip8, buf, size);
+    chip8_keyboard_set_map(&chip8.keyboard, keyboard_map);
 
-    chip8_screen_draw_sprite(&chip8.screen, 32, 16, &chip8.memory.memory[0x00], 5);
+    /*
+    chip8.registers.I = 0x00;
+    chip8.registers.V[0] = 10;
+    chip8.registers.V[1] = 10;
+    chip8_exec(&chip8, 0xD015);
+    */
 
     SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Window *window = SDL_CreateWindow(
@@ -57,6 +62,9 @@ int main(int argc, char **argv)
         CHIP8_HEIGHT * CHIP8_WINDOW_MULTIPLIER, SDL_WINDOW_SHOWN);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_TEXTUREACCESS_TARGET);
+
+    //chip8.registers.V[0] = 0x00;
+    //chip8_exec(&chip8, 0xF00A);
 
     while (1)
     {
@@ -72,18 +80,19 @@ int main(int argc, char **argv)
             case SDL_KEYDOWN:
             {
                 char key = event.key.keysym.sym;
-                int vkey = chip8_keyboard_map(keyboard_map, key);
+                int vkey = chip8_keyboard_map(&chip8.keyboard, key);
                 if (vkey != -1)
                 {
                     chip8_keyboard_down(&chip8.keyboard, vkey);
                 }
+                printf("%i\n", vkey);
             }
             break;
 
             case SDL_KEYUP:
             {
                 char key = event.key.keysym.sym;
-                int vkey = chip8_keyboard_map(keyboard_map, key);
+                int vkey = chip8_keyboard_map(&chip8.keyboard, key);
                 if (vkey != -1)
                 {
                     chip8_keyboard_up(&chip8.keyboard, vkey);
@@ -127,8 +136,9 @@ int main(int argc, char **argv)
         }
 
         unsigned short opcode = chip8_memory_get_short(&chip8.memory, chip8.registers.PC);
-        chip8_exec(&chip8, opcode);
         chip8.registers.PC += 2;
+        chip8_exec(&chip8, opcode);
+        //printf("%x\n", opcode);
     }
 
 out:
