@@ -6,6 +6,6 @@ Chip-8 is a simple, interpreted, programming language which was first used on so
 
 *Screenshots*: 
 
-| ![Image 1](images/Invaders.png) | ![Image 2](images/PONG.png) |
+| ![Image 1](images/Invaders.png) | ![Image 2](images/pong_image.png) |
 |:-------------------------------:|:--------------------------:|
 | **Invaders**                    | **Pong**                   |
